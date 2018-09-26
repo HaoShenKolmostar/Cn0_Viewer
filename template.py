@@ -181,14 +181,14 @@ template_str = '<!DOCTYPE html>\n' + \
     '                },\n' + \
     '                xAxis: [\n' + \
     '                    {\n' + \
-    '                        name: \'UTC\',\n' + \
+    '                        name: \'index\',\n' + \
     '                        type: \'category\',\n' + \
     '                        gridIndex: 0,\n' + \
     '                        boundaryGap: false,\n' + \
     '                        axisLine: { onZero: true },\n' + \
     '                        data: [${TIME_LIST}]\n' + \
     '                    }, {\n' + \
-    '                        name: \'UTC\',\n' + \
+    '                        name: \'index\',\n' + \
     '                        type: \'category\',\n' + \
     '                        show: false,\n' + \
     '                        gridIndex: 1,\n' + \
