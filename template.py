@@ -25,7 +25,7 @@ def cn0_dict_to_string(cn0_dict):
     res = ''
     for svid in cn0_dict:
         data_map = {
-            'SVID': svid,
+            'SVID': '\'{}\''.format(svid),
             'Cn0_LIST': _sat_cn0_dict_to_str(cn0_dict[svid])
         }
         res += Template(template_cn0).safe_substitute(data_map)
@@ -33,15 +33,22 @@ def cn0_dict_to_string(cn0_dict):
 
 
 def apply_template(file_name, time_list, cn0_dict, visible_list):
+    time_str_list = []
+    for t in time_list:
+        time_str_list.append(t.strftime('\'%H:%M:%S\''))
     svid_list = list(cn0_dict.keys())
+    svid_str_list = []
+    for svid in svid_list:
+        svid_str_list.append('\'{}\''.format(svid))
+    print(svid_str_list)
     data_map = {
         'FILE_NAME': file_name,
-        'TIME_LIST': ', '.join(time_list),
-        'SVID_LIST': ', '.join(svid_list),
+        'TIME_LIST': ', '.join(time_str_list),
+        'SVID_LIST': ', '.join(svid_str_list),
         'Cn0_DATA': cn0_dict_to_string(cn0_dict),
         'VISIBLE_SATS': ', '.join(visible_list),
-        'SVID_TRUE': ': true,'.join(svid_list) + ': true',
-        'SVID_FALSE': ': false,'.join(svid_list) + ': false'
+        'SVID_TRUE': ': true,'.join(svid_str_list) + ': true',
+        'SVID_FALSE': ': false,'.join(svid_str_list) + ': false'
     }
     return Template(template_str).safe_substitute(data_map)
 
@@ -203,14 +210,22 @@ template_str = '<!DOCTYPE html>\n' + \
     '                    {\n' + \
     '                        name: \'UTC\',\n' + \
     '                        type: \'time\',\n' + \
-    '                        splitNumber: 1,\n' + \
+    '                        splitNumber: 10,\n' + \
     '                        gridIndex: 0,\n' + \
     '                        boundaryGap: false,\n' + \
     '                        axisLine: { onZero: true },\n' + \
+    '                        axisLabel:{\n' + \
+    '                            formatter: function (value){\n' + \
+    '                                var hour = (value.getHour()).toString();  \n' + \
+    '                                var minute = (value.getMinute()).toString();  \n' + \
+    '                                var hour = (value.getSecond()).toString();  \n' + \
+    '                                return hour + \':\' + minute + \':\' + second;\n' + \
+    '                            }\n' + \
+    '                        }\n' + \
     '                    }, {\n' + \
     '                        name: \'UTC\',\n' + \
     '                        type: \'time\',\n' + \
-    '                        splitNumber: 1,\n' + \
+    '                        splitNumber: 10,\n' + \
     '                        show: false,\n' + \
     '                        gridIndex: 1,\n' + \
     '                        position: \'top\',\n' + \
@@ -277,8 +292,8 @@ template_str = '<!DOCTYPE html>\n' + \
     '                        else if (filtered_option.series[i].data[j][1] < cn0_threshold)\n' + \
     '                            filtered_option.series[i].data[j] = null;\n' + \
     '                        else {\n' + \
-    '                            if (!sat_count[j]) sat_count[j] = 1;\n' + \
-    '                            else sat_count[j]++;\n' + \
+    '                            if (!sat_count[j]) sat_count[j] = [filtered_option.series[i].data[j][0], 1];\n' + \
+    '                            else sat_count[j][1]++;\n' + \
     '                        }\n' + \
     '                    }\n' + \
     '                }\n' + \

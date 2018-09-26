@@ -38,7 +38,7 @@ class Record:
             record.server_time = gps_time_to_utc(float(params[3]),
                                                  float(params[4]))
 
-            if len(params) > 6:
+            if len(params) > 5:
                 record.time = datetime.strptime(
                     params[-1].strip(), "%Y%m%d%H%M%S")
             else:
