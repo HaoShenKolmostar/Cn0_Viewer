@@ -21,7 +21,7 @@ def analyze_log(records):
 
     cn0_dict = {}
     for svid in svid_list:
-        cn0_dict[svid] = []
+        cn0_dict[svid] = {}
 
     datetime_list = []
     start_time = records[0].time
@@ -50,9 +50,9 @@ def analyze_log(records):
         for svid in svid_list:
             if svid in curr_dict:
                 visible_count += 1
-                cn0_dict[svid].append(str(curr_dict[svid]))
+                cn0_dict[svid][curr_time] = str(curr_dict[svid])
             else:
-                cn0_dict[svid].append('null')
+                cn0_dict[svid][curr_time] = 'null'
         visible_list.append(str(visible_count))
         time_index += 1
     return time_list, cn0_dict, visible_list
@@ -84,8 +84,6 @@ def nmea(file_path):
 
 
 if __name__ == '__main__':
-    # nmea('/Users/sol/Documents/KolmoStar/GitHub/ublox_box/20180910073249/20180910073250.ubx')
-    # nmea('/Users/sol/Documents/KolmoStar/Data/uart_proto_collection/0910/ublox/long/20180910021011.ubx')
     fire.Fire({
         'kolmo': kolmo,
         'android': android,

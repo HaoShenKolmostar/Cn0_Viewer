@@ -1,12 +1,32 @@
 from string import Template
 
 
+def _datetime_to_js_str(datetime):
+    return 'new Date({},{},{},{},{},{})'.format(
+        datetime.year,
+        datetime.month,
+        datetime.day,
+        datetime.hour,
+        datetime.minute,
+        datetime.second
+    )
+
+
 def cn0_dict_to_string(cn0_dict):
+
+    def _sat_cn0_dict_to_str(sat_cn0_dict):
+        res_str = ''
+        for k, v in sat_cn0_dict.items():
+            res_str += '[new Date({}, {}, {}, {}, {}, {}), {}],'.format(
+                k.year, k.month, k.day, k.hour, k.minute, k.second, v
+            )
+        return res_str
+
     res = ''
-    for k in cn0_dict:
+    for svid in cn0_dict:
         data_map = {
-            'SVID': k,
-            'Cn0_LIST': ', '.join(cn0_dict[k])
+            'SVID': svid,
+            'Cn0_LIST': _sat_cn0_dict_to_str(cn0_dict[svid])
         }
         res += Template(template_cn0).safe_substitute(data_map)
     return res
@@ -182,19 +202,19 @@ template_str = '<!DOCTYPE html>\n' + \
     '                xAxis: [\n' + \
     '                    {\n' + \
     '                        name: \'UTC\',\n' + \
-    '                        type: \'category\',\n' + \
+    '                        type: \'time\',\n' + \
+    '                        splitNumber: 1,\n' + \
     '                        gridIndex: 0,\n' + \
     '                        boundaryGap: false,\n' + \
     '                        axisLine: { onZero: true },\n' + \
-    '                        data: [${TIME_LIST}]\n' + \
     '                    }, {\n' + \
     '                        name: \'UTC\',\n' + \
-    '                        type: \'category\',\n' + \
+    '                        type: \'time\',\n' + \
+    '                        splitNumber: 1,\n' + \
     '                        show: false,\n' + \
     '                        gridIndex: 1,\n' + \
     '                        position: \'top\',\n' + \
     '                        boundaryGap: false,\n' + \
-    '                        data: [${TIME_LIST}]\n' + \
     '                    }\n' + \
     '                ],\n' + \
     '                yAxis: [\n' + \
@@ -253,8 +273,8 @@ template_str = '<!DOCTYPE html>\n' + \
     '                let sat_count = new Array();\n' + \
     '                for (let i = 1; i < series_size; i++) {\n' + \
     '                    for (let j = 0; j < filtered_option.series[i].data.length; j++) {\n' + \
-    '                        if (filtered_option.series[i].data[j] == null) continue;\n' + \
-    '                        else if (filtered_option.series[i].data[j] < cn0_threshold)\n' + \
+    '                        if (filtered_option.series[i].data[j][1] == null) continue;\n' + \
+    '                        else if (filtered_option.series[i].data[j][1] < cn0_threshold)\n' + \
     '                            filtered_option.series[i].data[j] = null;\n' + \
     '                        else {\n' + \
     '                            if (!sat_count[j]) sat_count[j] = 1;\n' + \
@@ -289,7 +309,7 @@ template_str = '<!DOCTYPE html>\n' + \
     '                let valid_count = 0;\n' + \
     '                let first_6_unnormal_moments = new Array();\n' + \
     '                for (let j = 0; j < option.series[i].data.length; j++) {\n' + \
-    '                    let curr_cn0 = option.series[i].data[j];\n' + \
+    '                    let curr_cn0 = option.series[i].data[j][1];\n' + \
     '                    if (curr_cn0 == null) {\n' + \
     '                        if (first_6_unnormal_moments.length < 6) {\n' + \
     '                            first_6_unnormal_moments[first_6_unnormal_moments.length] = j + 1;\n' + \
@@ -329,7 +349,7 @@ template_str = '<!DOCTYPE html>\n' + \
     '\n' + \
     '            for (let i = 0; i < statistics.length; i++) {\n' + \
     '                curr_obj = statistics[i];\n' + \
-    '                if ( curr_obj.num_of_valid_moments == 0 ) continue;\n' + \
+    '                if (curr_obj.num_of_valid_moments == 0) continue;\n' + \
     '                table += \'<tr>\';\n' + \
     '                table += \'<td>\' + curr_obj.sat_id + \'</td>\';\n' + \
     '                table += \'<td>\' + curr_obj.cn0_average + \'</td>\';\n' + \
