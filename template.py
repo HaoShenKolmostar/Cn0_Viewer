@@ -1,24 +1,13 @@
 from string import Template
 
 
-def _datetime_to_js_str(datetime):
-    return 'new Date({},{},{},{},{},{})'.format(
-        datetime.year,
-        datetime.month,
-        datetime.day,
-        datetime.hour,
-        datetime.minute,
-        datetime.second
-    )
-
-
 def cn0_dict_to_string(cn0_dict):
 
     def _sat_cn0_dict_to_str(sat_cn0_dict):
         res_str = ''
         for k, v in sat_cn0_dict.items():
-            res_str += '[new Date({}, {}, {}, {}, {}, {}), {}],'.format(
-                k.year, k.month, k.day, k.hour, k.minute, k.second, v
+            res_str += '[{}, {}],'.format(
+                k.strftime('\'%H:%M:%S\''),  v
             )
         return res_str
 
@@ -209,27 +198,21 @@ template_str = '<!DOCTYPE html>\n' + \
     '                xAxis: [\n' + \
     '                    {\n' + \
     '                        name: \'UTC\',\n' + \
-    '                        type: \'time\',\n' + \
+    '                        type: \'category\',\n' + \
     '                        splitNumber: 10,\n' + \
     '                        gridIndex: 0,\n' + \
     '                        boundaryGap: false,\n' + \
     '                        axisLine: { onZero: true },\n' + \
-    '                        axisLabel:{\n' + \
-    '                            formatter: function (value){\n' + \
-    '                                var hour = (value.getHour()).toString();  \n' + \
-    '                                var minute = (value.getMinute()).toString();  \n' + \
-    '                                var hour = (value.getSecond()).toString();  \n' + \
-    '                                return hour + \':\' + minute + \':\' + second;\n' + \
-    '                            }\n' + \
-    '                        }\n' + \
+    '                        data: [$TIME_LIST],\n' + \
     '                    }, {\n' + \
     '                        name: \'UTC\',\n' + \
-    '                        type: \'time\',\n' + \
+    '                        type: \'category\',\n' + \
     '                        splitNumber: 10,\n' + \
     '                        show: false,\n' + \
     '                        gridIndex: 1,\n' + \
     '                        position: \'top\',\n' + \
     '                        boundaryGap: false,\n' + \
+    '                        data: [$TIME_LIST],\n' + \
     '                    }\n' + \
     '                ],\n' + \
     '                yAxis: [\n' + \
