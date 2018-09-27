@@ -2,26 +2,42 @@ from string import Template
 
 
 def cn0_dict_to_string(cn0_dict):
+
+    def _sat_cn0_dict_to_str(sat_cn0_dict):
+        res_str = ''
+        for k, v in sat_cn0_dict.items():
+            res_str += '[{}, {}],'.format(
+                k.strftime('\'%H:%M:%S\''),  v
+            )
+        return res_str
+
     res = ''
-    for k in cn0_dict:
+    for svid in cn0_dict:
         data_map = {
-            'SVID': k,
-            'Cn0_LIST': ', '.join(cn0_dict[k])
+            'SVID': '\'{}\''.format(svid),
+            'Cn0_LIST': _sat_cn0_dict_to_str(cn0_dict[svid])
         }
         res += Template(template_cn0).safe_substitute(data_map)
     return res
 
 
 def apply_template(file_name, time_list, cn0_dict, visible_list):
+    time_str_list = []
+    for t in time_list:
+        time_str_list.append(t.strftime('\'%H:%M:%S\''))
     svid_list = list(cn0_dict.keys())
+    svid_str_list = []
+    for svid in svid_list:
+        svid_str_list.append('\'{}\''.format(svid))
+    print(svid_str_list)
     data_map = {
         'FILE_NAME': file_name,
-        'TIME_LIST': ', '.join(time_list),
-        'SVID_LIST': ', '.join(svid_list),
+        'TIME_LIST': ', '.join(time_str_list),
+        'SVID_LIST': ', '.join(svid_str_list),
         'Cn0_DATA': cn0_dict_to_string(cn0_dict),
         'VISIBLE_SATS': ', '.join(visible_list),
-        'SVID_TRUE': ': true,'.join(svid_list) + ': true',
-        'SVID_FALSE': ': false,'.join(svid_list) + ': false'
+        'SVID_TRUE': ': true,'.join(svid_str_list) + ': true',
+        'SVID_FALSE': ': false,'.join(svid_str_list) + ': false'
     }
     return Template(template_str).safe_substitute(data_map)
 
@@ -183,18 +199,20 @@ template_str = '<!DOCTYPE html>\n' + \
     '                    {\n' + \
     '                        name: \'UTC\',\n' + \
     '                        type: \'category\',\n' + \
+    '                        splitNumber: 10,\n' + \
     '                        gridIndex: 0,\n' + \
     '                        boundaryGap: false,\n' + \
     '                        axisLine: { onZero: true },\n' + \
-    '                        data: [${TIME_LIST}]\n' + \
+    '                        data: [$TIME_LIST],\n' + \
     '                    }, {\n' + \
     '                        name: \'UTC\',\n' + \
     '                        type: \'category\',\n' + \
+    '                        splitNumber: 10,\n' + \
     '                        show: false,\n' + \
     '                        gridIndex: 1,\n' + \
     '                        position: \'top\',\n' + \
     '                        boundaryGap: false,\n' + \
-    '                        data: [${TIME_LIST}]\n' + \
+    '                        data: [$TIME_LIST],\n' + \
     '                    }\n' + \
     '                ],\n' + \
     '                yAxis: [\n' + \
@@ -253,12 +271,12 @@ template_str = '<!DOCTYPE html>\n' + \
     '                let sat_count = new Array();\n' + \
     '                for (let i = 1; i < series_size; i++) {\n' + \
     '                    for (let j = 0; j < filtered_option.series[i].data.length; j++) {\n' + \
-    '                        if (filtered_option.series[i].data[j] == null) continue;\n' + \
-    '                        else if (filtered_option.series[i].data[j] < cn0_threshold)\n' + \
+    '                        if (filtered_option.series[i].data[j][1] == null) continue;\n' + \
+    '                        else if (filtered_option.series[i].data[j][1] < cn0_threshold)\n' + \
     '                            filtered_option.series[i].data[j] = null;\n' + \
     '                        else {\n' + \
-    '                            if (!sat_count[j]) sat_count[j] = 1;\n' + \
-    '                            else sat_count[j]++;\n' + \
+    '                            if (!sat_count[j]) sat_count[j] = [filtered_option.series[i].data[j][0], 1];\n' + \
+    '                            else sat_count[j][1]++;\n' + \
     '                        }\n' + \
     '                    }\n' + \
     '                }\n' + \
@@ -289,7 +307,7 @@ template_str = '<!DOCTYPE html>\n' + \
     '                let valid_count = 0;\n' + \
     '                let first_6_unnormal_moments = new Array();\n' + \
     '                for (let j = 0; j < option.series[i].data.length; j++) {\n' + \
-    '                    let curr_cn0 = option.series[i].data[j];\n' + \
+    '                    let curr_cn0 = option.series[i].data[j][1];\n' + \
     '                    if (curr_cn0 == null) {\n' + \
     '                        if (first_6_unnormal_moments.length < 6) {\n' + \
     '                            first_6_unnormal_moments[first_6_unnormal_moments.length] = j + 1;\n' + \
@@ -329,7 +347,7 @@ template_str = '<!DOCTYPE html>\n' + \
     '\n' + \
     '            for (let i = 0; i < statistics.length; i++) {\n' + \
     '                curr_obj = statistics[i];\n' + \
-    '                if ( curr_obj.num_of_valid_moments == 0 ) continue;\n' + \
+    '                if (curr_obj.num_of_valid_moments == 0) continue;\n' + \
     '                table += \'<tr>\';\n' + \
     '                table += \'<td>\' + curr_obj.sat_id + \'</td>\';\n' + \
     '                table += \'<td>\' + curr_obj.cn0_average + \'</td>\';\n' + \

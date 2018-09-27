@@ -13,4 +13,4 @@ def utc_to_gps_qzss_gal_week(utc_datetime):
 
 def gps_time_to_utc(gps_week, gps_tow):
     timestamp = SYSTEM_GPS_OFFSET + gps_week * SECONDS_A_WEEK + gps_tow
-    return datetime.utcfromtimestamp(timestamp)
+    return datetime.utcfromtimestamp(timestamp).replace(microsecond=0)
