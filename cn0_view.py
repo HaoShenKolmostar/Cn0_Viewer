@@ -1,6 +1,6 @@
-import fire
 import os.path as op
 from datetime import timedelta
+import fire
 from template import apply_template
 from record import Record
 
@@ -52,7 +52,7 @@ def analyze_log(records):
 
 def show_records(records, file_path):
     time_list, cn0_dict, visible_list = analyze_log(records)
-    filename, file_extension = op.splitext(file_path)
+    _, file_extension = op.splitext(file_path)
     if not file_extension:
         file_extension = '.txt'
     with open(file_path.replace(file_extension, '') + '_cn0.html', 'wt') as f:
