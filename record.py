@@ -3,9 +3,10 @@ import os
 from collections import namedtuple
 from datetime import datetime, timedelta
 from time_utils import gps_time_to_utc
-from pvt_utils import ElAzCalculator
+from pvt_utils import ElAzCalculator, REFERENCE
 
 SateInfo = namedtuple('SateInfo', ('constellation', 'svid', 'cn0', 'el', 'az'))
+elaz_helper = ElAzCalculator(REFERENCE)
 
 
 class Record:
@@ -17,7 +18,6 @@ class Record:
         self.time = None
         self.server_time = None
         self.sat_infos = []
-        self.elaz_helper = ElAzCalculator()
 
     @staticmethod
     def parse_uart_proto_file(file_path):
@@ -50,10 +50,15 @@ class Record:
                 j_str = simplified_str[split_index+1:-16]
                 jarray = json.loads(j_str.replace('\'', '\"'))
                 for jobj in jarray:
+                    constellation = 'G'
+                    svid = '%02d' % (int(list(jobj.keys())[0]))
+                    el, az = elaz_helper.calculate(
+                        record.time, constellation, svid, REFERENCE)
                     record.sat_infos.append(
-                        SateInfo('G', '%02d' % (int(list(jobj.keys())[0])),
-                                 list(jobj.values())[0], 0, 0))
+                        SateInfo(constellation, svid,
+                                 list(jobj.values())[0], el, az))
             record_list.append(record)
+            print(record.__dict__)
         return record_list
 
     @staticmethod
