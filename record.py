@@ -3,8 +3,9 @@ import os
 from collections import namedtuple
 from datetime import datetime, timedelta
 from time_utils import gps_time_to_utc
+from pvt_utils import ElAzCalculator
 
-SateInfo = namedtuple('SateInfo', ('constellation', 'svid', 'cn0'))
+SateInfo = namedtuple('SateInfo', ('constellation', 'svid', 'cn0', 'el', 'az'))
 
 
 class Record:
@@ -16,6 +17,7 @@ class Record:
         self.time = None
         self.server_time = None
         self.sat_infos = []
+        self.elaz_helper = ElAzCalculator()
 
     @staticmethod
     def parse_uart_proto_file(file_path):
@@ -50,7 +52,7 @@ class Record:
                 for jobj in jarray:
                     record.sat_infos.append(
                         SateInfo('G', '%02d' % (int(list(jobj.keys())[0])),
-                                 list(jobj.values())[0]))
+                                 list(jobj.values())[0], 0, 0))
             record_list.append(record)
         return record_list
 
@@ -80,7 +82,7 @@ class Record:
                     curr_record.sat_infos.append(
                         SateInfo('G',
                                  '%02d' % (int(curr_line.split(',')[1])),
-                                 curr_line.split(',')[2]))
+                                 curr_line.split(',')[2], 0, 0))
             record_list.append(curr_record)
             index += 1
         return record_list
@@ -151,7 +153,8 @@ class Record:
                     for j in range(0, sat_num):
                         if gsv_strs[7 + 4*j]:
                             record.sat_infos.append(
-                                SateInfo('G', gsv_strs[4 + 4*j], gsv_strs[7 + 4*j]))
+                                SateInfo('G', gsv_strs[4 + 4*j],
+                                         gsv_strs[7 + 4*j], 0, 0))
                 index += gsv_line_count
                 break
 
