@@ -13,3 +13,8 @@ def datetime_to_timestamp(d: datetime):
 def second_of_gps_week(d: datetime):
     timestamp = calendar.timegm(d.utctimetuple())
     return (timestamp - SYSTEM_GPS_OFFSET) % SECONDS_A_WEEK
+
+
+def gps_time_to_utc(gps_week, gps_tow):
+    timestamp = SYSTEM_GPS_OFFSET + gps_week * SECONDS_A_WEEK + gps_tow
+    return datetime.utcfromtimestamp(timestamp).replace(microsecond=0)

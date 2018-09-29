@@ -7,7 +7,7 @@ from pvt import (
     calc_sat_pv_ek,
     load_eph_from_string
 )
-from time_utils import datetime_to_timestamp, second_of_gps_week
+from time_utils import second_of_gps_week
 
 
 def _dgr_to_arc(dgr):
@@ -32,10 +32,10 @@ def calculate_elaz(eph, record_time, ref):
     ecef = XYZ.from_degree_llh(ref.lat, ref.lon, ref.height)
     el_az = ElAz()
     SatElAz(sat_pv_ek.pos, ecef, el_az)
-    return _arc_to_dgr(el_az.el), _arc_to_dgr(el_az.az)
+    return round(_arc_to_dgr(el_az.el), 2), \
+        round(_arc_to_dgr(el_az.az), 2)
 
 
 def parse_eph_str(eph_str, ref_time):
-    time_stamp = datetime_to_timestamp(ref_time)
     return load_eph_from_string(eph_str,
-                                WeekSecond(second_of_gps_week(time_stamp)))
+                                WeekSecond(second_of_gps_week(ref_time)))
