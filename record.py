@@ -3,8 +3,9 @@ import os
 from collections import namedtuple
 from datetime import datetime, timedelta
 from time_utils import gps_time_to_utc
+from el_az_calculator import get_elaz
 
-SateInfo = namedtuple('SateInfo', ('constellation', 'svid', 'cn0'))
+SateInfo = namedtuple('SateInfo', ('constellation', 'svid', 'cn0', 'el', 'az'))
 
 
 class Record:
@@ -48,9 +49,12 @@ class Record:
                 j_str = simplified_str[split_index+1:-16]
                 jarray = json.loads(j_str.replace('\'', '\"'))
                 for jobj in jarray:
+                    constellation = 'G'
+                    svid = '%02d' % (int(list(jobj.keys())[0]))
+                    el, az = get_elaz(record.time, constellation, svid)
                     record.sat_infos.append(
-                        SateInfo('G', '%02d' % (int(list(jobj.keys())[0])),
-                                 list(jobj.values())[0]))
+                        SateInfo(constellation, svid,
+                                 list(jobj.values())[0], el, az))
             record_list.append(record)
         return record_list
 
@@ -77,10 +81,11 @@ class Record:
                 index += 1
                 curr_line = lines[index]
                 if curr_line.startswith('GPS'):
+                    constellation = 'G'
+                    svid = '%02d' % (int(curr_line.split(',')[1]))
+                    el, az = get_elaz(curr_record.time, constellation, svid)
                     curr_record.sat_infos.append(
-                        SateInfo('G',
-                                 '%02d' % (int(curr_line.split(',')[1])),
-                                 curr_line.split(',')[2]))
+                        SateInfo('G', svid, curr_line.split(',')[2], el, az))
             record_list.append(curr_record)
             index += 1
         return record_list
@@ -104,13 +109,6 @@ class Record:
                 dollar_index = binary.find(b'$GNRMC')
                 binary = binary[dollar_index:].replace(b'\xb5', b'')
                 return binary.decode().split('$')
-
-        def line_valid(line_str, line_pattern):
-            if not line_str.startswith(line_pattern):
-                return False
-            elif '$' in line_str[6:]:
-                return False
-            return True
 
         lines = []
         if not os.path.isdir(ubx_path):
@@ -150,8 +148,12 @@ class Record:
                     sat_num = (len(gsv_strs) - 5) // 4
                     for j in range(0, sat_num):
                         if gsv_strs[7 + 4*j]:
+                            constellation = 'G'
+                            svid = gsv_strs[4 + 4*j]
+                            el, az = get_elaz(
+                                record.time, constellation, svid)
                             record.sat_infos.append(
-                                SateInfo('G', gsv_strs[4 + 4*j], gsv_strs[7 + 4*j]))
+                                SateInfo('G', svid, gsv_strs[7 + 4*j], el, az))
                 index += gsv_line_count
                 break
 

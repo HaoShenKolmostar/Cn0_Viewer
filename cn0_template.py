@@ -21,7 +21,7 @@ def cn0_dict_to_string(cn0_dict):
     return res
 
 
-def apply_template(file_name, time_list, cn0_dict, visible_list):
+def apply_cn0_template(file_name, time_list, cn0_dict, visible_list):
     time_str_list = []
     for t in time_list:
         time_str_list.append(t.strftime('\'%H:%M:%S\''))
@@ -29,7 +29,6 @@ def apply_template(file_name, time_list, cn0_dict, visible_list):
     svid_str_list = []
     for svid in svid_list:
         svid_str_list.append('\'{}\''.format(svid))
-    print(svid_str_list)
     data_map = {
         'FILE_NAME': file_name,
         'TIME_LIST': ', '.join(time_str_list),
