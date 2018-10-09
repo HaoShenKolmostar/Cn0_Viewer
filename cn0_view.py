@@ -3,6 +3,7 @@ from datetime import timedelta
 from math import isnan
 import fire
 from record import Record, SateInfo
+from record_parser import RecordParser
 from cn0_template import apply_cn0_template
 from elaz_template import apply_elaz_template
 from el_az_calculator import get_elaz
@@ -106,17 +107,17 @@ def show_records(records, file_path):
 
 
 def kolmo(file_path):
-    records = Record.parse_uart_proto_file(file_path)
+    records = RecordParser.parse_uart_proto_file(file_path)
     show_records(records, file_path)
 
 
 def android(file_path):
-    records = Record.parse_android_log(file_path)
+    records = RecordParser.parse_android_log(file_path)
     show_records(records, file_path)
 
 
 def nmea(file_path):
-    records = Record.parse_nmea_file(file_path)
+    records = RecordParser.parse_nmea_file(file_path)
     show_records(records, file_path)
 
 
