@@ -6,12 +6,12 @@ SYSTEM_GPS_OFFSET = 315964800
 SECONDS_A_WEEK = 604800
 
 
-def datetime_to_timestamp(d: datetime):
-    return calendar.timegm(d.timetuple())
+def datetime_to_timestamp(dt: datetime):
+    return calendar.timegm(dt.timetuple())
 
 
-def second_of_gps_week(d: datetime):
-    timestamp = calendar.timegm(d.utctimetuple())
+def second_of_gps_week(dt: datetime):
+    timestamp = calendar.timegm(dt.utctimetuple())
     return (timestamp - SYSTEM_GPS_OFFSET) % SECONDS_A_WEEK
 
 

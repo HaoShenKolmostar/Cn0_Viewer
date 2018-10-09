@@ -15,7 +15,6 @@ def download_kolmo_eph(start_time):
         start_stamp,
         start_stamp + 3600 * hour_interval + 300
     )
-    print(url)
     response = requests.get(url, verify=False)
     return json.loads(response.text)['content']
 
